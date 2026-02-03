@@ -1317,10 +1317,53 @@ const quizData = [
     }
 ];
 
+// Shuffle function - Fisher-Yates algorithm
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// Shuffle quiz data
+function shuffleQuiz() {
+    // Shuffle questions
+    const shuffledQuestions = shuffleArray(quizData);
+    
+    // For each question, shuffle options and update correct index
+    return shuffledQuestions.map(q => {
+        // Create pairs of [option, originalIndex]
+        const optionsWithIndex = q.options.map((opt, idx) => ({
+            text: opt,
+            originalIndex: idx
+        }));
+        
+        // Shuffle options
+        const shuffledOptions = shuffleArray(optionsWithIndex);
+        
+        // Find new correct index
+        const newCorrectIndex = shuffledOptions.findIndex(
+            opt => opt.originalIndex === q.correct
+        );
+        
+        // Return with shuffled options
+        return {
+            ...q,
+            options: shuffledOptions.map(opt => opt.text),
+            correct: newCorrectIndex
+        };
+    });
+}
+
+// Shuffle quiz on load
+let shuffledQuizData = shuffleQuiz();
+
 // Game state
 let currentQuestion = 0;
 let score = 0;
-let userAnswers = new Array(quizData.length).fill(null);
+let userAnswers = new Array(shuffledQuizData.length).fill(null);
 
 // DOM Elements
 const questionCounter = document.getElementById('questionCounter');
@@ -1353,7 +1396,7 @@ function initQuiz() {
 
 // Load question
 function loadQuestion(index) {
-    const question = quizData[index];
+    const question = shuffledQuizData[index];
     
     // Update counter
     questionCounter.textContent = `Question ${index + 1}/${quizData.length}`;
@@ -1402,7 +1445,7 @@ function selectOption(optionIndex) {
     // Prevent re-answering
     if (userAnswers[currentQuestion] !== null) return;
     
-    const question = quizData[currentQuestion];
+    const question = shuffledQuizData[currentQuestion];
     const options = optionsContainer.querySelectorAll('.option');
     
     // Record answer
@@ -1431,7 +1474,7 @@ function prevQuestion() {
 
 // Navigate to next question
 function nextQuestion() {
-    if (currentQuestion < quizData.length - 1) {
+    if (currentQuestion < shuffledQuizData.length - 1) {
         currentQuestion++;
         loadQuestion(currentQuestion);
         updateNavigation();
@@ -1444,12 +1487,12 @@ function nextQuestion() {
 // Update navigation buttons
 function updateNavigation() {
     prevBtn.disabled = currentQuestion === 0;
-    nextBtn.textContent = currentQuestion === quizData.length - 1 ? 'Finish ✓' : 'Next →';
+    nextBtn.textContent = currentQuestion === shuffledQuizData.length - 1 ? 'Finish ✓' : 'Next →';
 }
 
 // Show answer modal
 function showAnswer() {
-    const question = quizData[currentQuestion];
+    const question = shuffledQuizData[currentQuestion];
     const correctOption = question.options[question.correct];
     
     document.getElementById('correctAnswer').innerHTML = `
@@ -1474,7 +1517,7 @@ function showResults() {
     
     document.getElementById('correctCount').textContent = score;
     
-    const percentage = (score / quizData.length) * 100;
+    const percentage = (score / shuffledQuizData.length) * 100;
     const resultMessage = document.getElementById('resultMessage');
     
     if (percentage >= 90) {
@@ -1490,11 +1533,14 @@ function showResults() {
 
 // Restart quiz
 function restartQuiz() {
+    // Reshuffle on restart
+    shuffledQuizData = shuffleQuiz();
     currentQuestion = 0;
     score = 0;
-    userAnswers = new Array(quizData.length).fill(null);
+    userAnswers = new Array(shuffledQuizData.length).fill(null);
     
     quizCard.style.display = 'block';
+    quizCard.style.flexDirection = 'column';
     quizComplete.style.display = 'none';
     
     loadQuestion(0);
@@ -1513,7 +1559,7 @@ document.addEventListener('keydown', (e) => {
     // Number keys 1-4 for options
     if (e.key >= '1' && e.key <= '4') {
         const optionIndex = parseInt(e.key) - 1;
-        if (optionIndex < quizData[currentQuestion].options.length) {
+        if (optionIndex < shuffledQuizData[currentQuestion].options.length) {
             selectOption(optionIndex);
         }
     }
@@ -1540,5 +1586,12 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Start the quiz
-initQuiz();
+// Start when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        initQuiz();
+    } catch (error) {
+        console.error('Failed to initialize quiz:', error);
+        questionText.textContent = 'Failed to load quiz. Please refresh the page.';
+    }
+});
