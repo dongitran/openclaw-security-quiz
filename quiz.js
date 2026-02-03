@@ -1365,16 +1365,8 @@ let currentQuestion = 0;
 let score = 0;
 let userAnswers = new Array(shuffledQuizData.length).fill(null);
 
-// DOM Elements
-const questionCounter = document.getElementById('questionCounter');
-const categoryBadge = document.getElementById('categoryBadge');
-const questionText = document.getElementById('questionText');
-const optionsContainer = document.getElementById('optionsContainer');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const quizCard = document.querySelector('.quiz-card');
-const quizComplete = document.getElementById('quizComplete');
-const answerModal = document.getElementById('answerModal');
+// DOM Elements (will be initialized in initQuiz)
+let questionCounter, categoryBadge, questionText, optionsContainer, prevBtn, nextBtn, quizCard, quizComplete, answerModal;
 
 // Category icons
 const categoryIcons = {
@@ -1390,6 +1382,17 @@ const categoryIcons = {
 
 // Initialize quiz
 function initQuiz() {
+    // Initialize DOM elements
+    questionCounter = document.getElementById('questionCounter');
+    categoryBadge = document.getElementById('categoryBadge');
+    questionText = document.getElementById('questionText');
+    optionsContainer = document.getElementById('optionsContainer');
+    prevBtn = document.getElementById('prevBtn');
+    nextBtn = document.getElementById('nextBtn');
+    quizCard = document.querySelector('.quiz-card');
+    quizComplete = document.getElementById('quizComplete');
+    answerModal = document.getElementById('answerModal');
+    
     loadQuestion(currentQuestion);
     updateNavigation();
 }
@@ -1399,7 +1402,7 @@ function loadQuestion(index) {
     const question = shuffledQuizData[index];
     
     // Update counter
-    questionCounter.textContent = `Question ${index + 1}/${quizData.length}`;
+    questionCounter.textContent = `Question ${index + 1}/${shuffledQuizData.length}`;
     
     // Update category badge with icon
     const icon = categoryIcons[question.category] || '📝';
