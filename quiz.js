@@ -1508,7 +1508,7 @@ function showAnswer() {
 
 // Close modal
 function closeModal(event) {
-    if (!event || event.target === answerModal || event.target.classList.contains('modal-close')) {
+    if (!event || event.target === answerModal || event.target.classList.contains('modal-close') || event.target.closest('.modal-close')) {
         answerModal.classList.remove('active');
     }
 }
