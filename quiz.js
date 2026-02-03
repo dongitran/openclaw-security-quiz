@@ -1382,6 +1382,8 @@ const categoryIcons = {
 
 // Initialize quiz
 function initQuiz() {
+    console.log('Initializing quiz...');
+    
     // Initialize DOM elements
     questionCounter = document.getElementById('questionCounter');
     categoryBadge = document.getElementById('categoryBadge');
@@ -1393,8 +1395,13 @@ function initQuiz() {
     quizComplete = document.getElementById('quizComplete');
     answerModal = document.getElementById('answerModal');
     
+    console.log('DOM elements initialized');
+    console.log('shuffledQuizData length:', shuffledQuizData.length);
+    
     loadQuestion(currentQuestion);
     updateNavigation();
+    
+    console.log('Quiz initialized successfully');
 }
 
 // Load question
@@ -1595,6 +1602,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initQuiz();
     } catch (error) {
         console.error('Failed to initialize quiz:', error);
-        questionText.textContent = 'Failed to load quiz. Please refresh the page.';
+        const qText = document.getElementById('questionText');
+        if (qText) qText.textContent = 'Failed to load quiz. Please refresh the page.';
     }
 });
